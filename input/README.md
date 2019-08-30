@@ -7,23 +7,24 @@ Validator::apply(array $param, array $ruleset)
 * **$ruleset** Ruels for *$param* test. Array of *param_name => param_type* pairs (see example).
 ## Parameter type options
 * required
+* is_string
+* is_string_alphanumeric
+* is_string_numeric
+* is_string_alpha
+* is_not_empty_string
+* is_boolean
+* is_num
 * is_id_num
 * is_array_id_num
 * is_timestamp
 * is_timestamp_range
-* is_not_empty_string
-* is_string
-* is_boolean
-* is_string_alphanumeric
-* is_string_numeric
-* is_string_alpha
 * is_ip_address
 ## Example
 ```php
 $validator = new Validator();
 $error = $validator->apply($param,
 			   ['id'         => ['is_id_num'],
-			    'name'       => ['required', 'is_string_alphanumeric'],
+			    'name'       => ['required', 'is_string_alphanumeric', 'is_not_empty_string'],
 			    'service_id' => ['required', 'is_id_num'],
 			    'count'      => ['is_num'],
 			    'host'       => ['is_ip_address'],
