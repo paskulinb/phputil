@@ -22,6 +22,12 @@ class Validator
                 $cmd = array_shift($args);
             
                 switch ($cmd){
+                    case 'is_num':
+                        if (!is_numeric($obj[$prop_name])){
+                            $error[] = "Not a number '$prop_name' (".$obj[$prop_name].")";
+                        }
+                        continue;
+                    
                     case 'is_id_num':
                         if (!$this->is_id_num($obj[$prop_name])){
                             $error[] = "Invalid ID '$prop_name' (".$obj[$prop_name].")";
