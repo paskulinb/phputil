@@ -1,2 +1,2 @@
 # phputil
-Different kinds of utilities
+Different kinds of utilities.
