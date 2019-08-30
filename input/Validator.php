@@ -23,75 +23,75 @@ class Validator
             
                 switch ($cmd){
                     case 'is_id_num':
-                        if(!$this->is_id_num($obj[$prop_name])){
+                        if (!$this->is_id_num($obj[$prop_name])){
                             $error[] = "Invalid ID '$prop_name' (".$obj[$prop_name].")";
                         }
                         continue;
                     
                     case 'is_id_num_array':
-                        if(!$this->is_id_num_array($obj[$prop_name])){
+                        if (!$this->is_id_num_array($obj[$prop_name])){
                             $error[] = "Invalid array of IDs '$prop_name'";
                         }
                         continue;
                     
                     case 'is_timestamp':
-                        if(!$this->is_timestamp($obj[$prop_name])){
+                        if (!$this->is_timestamp($obj[$prop_name])){
                             $error[] = "Invalid timestamp '$prop_name' (".$obj[$prop_name].")";
                         }
                         continue;
                     
 
                     case 'is_timestamp_range':
-                        if(!$this->is_timestamp_range($obj[$prop_name])){
+                        if (!$this->is_timestamp_range($obj[$prop_name])){
                             $error[] = "Invalid timestamp range '$prop_name'";
                         }
                         continue;
                     
                     
                     case 'is_not_empty_string':
-                        if(!$this->is_not_empty_string($obj[$prop_name])){
+                        if (!$this->is_not_empty_string($obj[$prop_name])){
                             $error[] = "Empty string '$prop_name'";
                         }
                         continue;
                     
                     
                     case 'is_string':
-                        if(!is_string($obj[$prop_name])){
+                        if (!is_string($obj[$prop_name])){
                             $error[] = "Not a string '$prop_name'";
                         }
                         continue;
                     
                     
                     case 'is_boolean':
-                        if(!is_bool($obj[$prop_name])){
+                        if (!is_bool($obj[$prop_name])){
                             $error[] = "Not boolean '$prop_name'";
                         }
                         continue;
 
 
                     case 'is_string_alphanumeric':
-                        if(!is_string_alphanumeric($obj[$prop_name])){
+                        if (!is_string_alphanumeric($obj[$prop_name])){
                             $error[] = "Not alpha-numeric string '$prop_name'";
                         }
                         continue;
 
 
                     case 'is_string_numeric':
-                        if(!is_string_numeric($obj[$prop_name])){
+                        if (!is_string_numeric($obj[$prop_name])){
                             $error[] = "Not a numeric string '$prop_name'";
                         }
                         continue;
 
 
                     case 'is_string_alpha':
-                        if(!is_string_alpha($obj[$prop_name])){
+                        if (!is_string_alpha($obj[$prop_name])){
                             $error[] = "Not a alpha string '$prop_name'";
                         }
                         continue;
 
 
                     case 'is_ip_address':
-                        if(!is_ip_address($obj[$prop_name])){
+                        if (!is_ip_address($obj[$prop_name])){
                             $error[] = "Not valid IP address '$prop_name'";
                         }
                         continue;
