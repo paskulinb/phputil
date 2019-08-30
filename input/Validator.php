@@ -151,27 +151,27 @@ class Validator
     
     private function is_ip_address($str)
     {
-		if (preg_match("/^\d{1,3}\.\d{1,3}\.\d{1,3}\.d{1,3}$/", $str) == 1) return true;
-		return false;
-	}
+	if (preg_match("/^\d{1,3}\.\d{1,3}\.\d{1,3}\.d{1,3}$/", $str) == 1) return true;
+	return false;
+    }
     
     private function is_string_alphanumeric($str)
     {
-		if (preg_match("/[^a-zA-Z0-9čšžČŠŽ]+/", $str) == 1) return true;
-		return false;
-	}
+        if (preg_match("/[^a-zA-Z0-9čšžČŠŽ]+/", $str) == 1) return true;
+        return false;
+    }
     
     private function is_string_alpha($str)
     {
-		if (preg_match("/[^a-zA-ZčšžČŠŽ]+/", $str) == 1) return true;
-		return false;
-	}
+        if (preg_match("/[^a-zA-ZčšžČŠŽ]+/", $str) == 1) return true;
+        return false;
+    }
     
     private function is_string_numeric($str)
     {
-		if (preg_match("/[^0-9]+/", $str) == 1) return true;
-		return false;
-	}
+        if (preg_match("/[^0-9]+/", $str) == 1) return true;
+        return false;
+    }
     
     public static function filter(array $input, array $keys)
     {
