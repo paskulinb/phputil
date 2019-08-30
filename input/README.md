@@ -15,7 +15,7 @@ Validator::apply(array $param, array $ruleset)
 * is_boolean
 * is_num
 * is_id_num
-* is_array_id_num
+* is_id_num_array
 * is_timestamp
 * is_timestamp_range
 * is_ip_address
