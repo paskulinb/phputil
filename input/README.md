@@ -1,5 +1,5 @@
 # Validator
-This class is intended for use for input data validation from HTTP request (forms, ajax).
+This class is intended to use for input data validation from HTTP request (forms, ajax).
 ```php
 Validator::apply(array $param, array $ruleset)
 ```
