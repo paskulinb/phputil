@@ -28,8 +28,8 @@ class Validator
                         }
                         continue;
                     
-                    case 'is_array_id_num':
-                        if(!$this->is_array_id_num($obj[$prop_name])){
+                    case 'is_id_num_array':
+                        if(!$this->is_id_num_array($obj[$prop_name])){
                             $error[] = "Invalid array of IDs '$prop_name'";
                         }
                         continue;
@@ -106,7 +106,7 @@ class Validator
         return (is_integer($id) && $id > 0) ? true : false;
     }
 
-    private function is_array_id_num($arrid)
+    private function is_id_num_array($arrid)
     {
         if (!is_array($arrid))
             return false;
