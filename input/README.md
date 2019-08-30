@@ -22,13 +22,17 @@ Validator::apply(array $param, array $ruleset)
 ## Example
 ```php
 $validator = new Validator();
-$error = $validator->apply($param,
-			   ['id'         => ['is_id_num'],
-			    'name'       => ['required', 'is_string_alphanumeric', 'is_not_empty_string'],
-			    'service_id' => ['required', 'is_id_num'],
-			    'count'      => ['is_num'],
-			    'host'       => ['is_ip_address'],
-			    'protocol'   => ['is_string']]);
+$error = $validator->apply(
+    $param,
+    [
+        'id'         => ['is_id_num'],
+        'name'       => ['required', 'is_string_alphanumeric', 'is_not_empty_string'],
+        'service_id' => ['required', 'is_id_num'],
+        'count'      => ['is_num'],
+        'host'       => ['is_ip_address'],
+        'protocol'   => ['is_string']
+    ]
+);
 
 if (!empty($error)) {
     print_r($error);
