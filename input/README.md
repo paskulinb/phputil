@@ -1,7 +1,7 @@
 # Validator
 This class is intended to use for input data validation from HTTP request (forms, ajax).
 ```php
-Validator::apply(array $param, array $ruleset) : array
+Validator::apply(array $param, array $ruleset): array
 ```
 * **$param** Input data to be validated. It is array of *param_name => param_value* pairs. 
 * **$ruleset** Ruels for *$param* test. Array of *param_name => param_type* pairs (see example).
