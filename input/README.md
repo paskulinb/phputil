@@ -1,4 +1,9 @@
 # Validator
+This class is intended for use for input data validation from HTTP request (forms, ajax).
+**Validator::apply(array $param, array $ruleset)**
+**$param** is array of key=>value pairs. It is the input data to be validated.
+**$ruleset** ruels for $param test. Array of key=>value pairs, where each *key* represents the name of input parameter to test and the *value* is array fo rules/tests for the input parameter (see example).
+## Parameter type options
 * required
 * is_id_num
 * is_array_id_num
