@@ -40,12 +40,23 @@ class Validator
                         }
                         continue;
                     
-                    case 'is_timestamp':
+                    case 'is_time':
+                        if (!$this->is_time($obj[$prop_name])){
+                            $error[] = "Invalid time '$prop_name' (".$obj[$prop_name].")";
+                        }
+                        continue;
+
+		    case 'is_date':
+                        if (!$this->is_date($obj[$prop_name])){
+                            $error[] = "Invalid date '$prop_name' (".$obj[$prop_name].")";
+                        }
+                        continue;
+
+		    case 'is_timestamp':
                         if (!$this->is_timestamp($obj[$prop_name])){
                             $error[] = "Invalid timestamp '$prop_name' (".$obj[$prop_name].")";
                         }
                         continue;
-                    
 
                     case 'is_timestamp_range':
                         if (!$this->is_timestamp_range($obj[$prop_name])){
@@ -129,6 +140,22 @@ class Validator
     private function is_timestamp($ts)
     {
         if (preg_match('/\d\d\d\d-\d{1,2}-\d{1,2}[T ]\d{1,2}:\d{1,2}:[\d\.+]+/', $ts) !== 1)
+            return false;
+
+        return true;
+    }
+ 
+    private function is_time($ts)
+    {
+        if (preg_match('/^\d{1,2}:\d{1,2}:[\d\.+]+$/', $ts) !== 1)
+            return false;
+
+        return true;
+    }
+    
+    private function is_date($ts)
+    {
+        if (preg_match('/^\d\d\d\d-\d{1,2}-\d{1,2}$/', $ts) !== 1)
             return false;
 
         return true;
