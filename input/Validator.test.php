@@ -105,6 +105,7 @@ fn_test(
         [['', ''], true],
         [[null, null], true],
         [['2019-2-17T0:0:0'], false],
+        [[], false],
     ]
 );
 
@@ -193,16 +194,19 @@ fn_test(
 ###########################################
 function fn_test($fn_name, $test_cases)
 {
+    $err = false;
 	echo "Function: $fn_name\n";
 	$ret = null;
 	foreach ($test_cases as $case) {
 		$ret = Validator::$fn_name($case[0]);
 		if ($ret === $case[1]) {}//echo "OK\n";
 		else {
+            $err = true;
 			echo "FAIL: ";
             print_r($case[0]);
 			echo "\nRETURNED ";
 			var_dump($ret);
 		}
 	}
+    if (!$err) echo "OK\n";
 }

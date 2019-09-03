@@ -142,7 +142,7 @@ class Validator
 
     public static function is_timestamp($ts)
     {
-        if (preg_match('/^\d\d\d\d-\d{1,2}-\d{1,2}[T ]\d{1,2}:\d{1,2}:[\d\.+]+$/', $ts) !== 1)
+        if (preg_match('/^\d{4}-\d{1,2}-\d{1,2}[T ]\d{1,2}:\d{1,2}:[\d\.]+$/', $ts) !== 1)
             return false;
 
         return true;
@@ -167,7 +167,7 @@ class Validator
 
     public static function is_time($ts)
     {
-        if (preg_match('/^\d{1,2}:\d{1,2}(:[\d\.+]+)*$/', $ts) !== 1)
+        if (preg_match('/^\d{1,2}:\d{1,2}(:[\d\.]+)*$/', $ts) !== 1)
             return false;
 
         return true;
@@ -175,7 +175,7 @@ class Validator
 
     public static function is_date($ts)
     {
-        if (preg_match('/^\d\d\d\d-\d{1,2}-\d{1,2}$/', $ts) !== 1)
+        if (preg_match('/^\d{4}-\d{1,2}-\d{1,2}$/', $ts) !== 1)
             return false;
 
         return true;
