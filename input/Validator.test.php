@@ -177,8 +177,6 @@ fn_test(
     ]
 );
 
-
-
 fn_test(
 	'is_ip_address',
 	[
@@ -190,6 +188,27 @@ fn_test(
         ['', false],
     ]
 );
+
+
+$err = Validator::apply(
+    [
+        's1'   => 12,
+        'tsr1' => ['2019-2-1 21:2:3',null],
+        'tsr2' => ['2019-2-1 21:2:3'],
+        'ip1'  => 132.3,
+        'ip2'  => '192.0.32.0',
+    ],
+    [
+        'x'    => ['required'],
+        's1'   => ['is_string'],
+        'tsr1' => ['is_timestamp_range'],
+        'tsr2' => ['is_timestamp_range'],
+        'ip1'  => ['is_ip_address', 'required'],
+        'ip2'  => ['is_ip_address'],
+    ]
+);
+
+print_r($err);
 
 ###########################################
 function fn_test($fn_name, $test_cases)

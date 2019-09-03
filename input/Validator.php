@@ -142,6 +142,7 @@ class Validator
 
     public static function is_timestamp($ts)
     {
+		if (!is_string($ts)) return false;
         if (preg_match('/^\d{4}-\d{1,2}-\d{1,2}[T ]\d{1,2}:\d{1,2}:[\d\.]+$/', $ts) !== 1)
             return false;
 
@@ -167,6 +168,7 @@ class Validator
 
     public static function is_time($ts)
     {
+		if (!is_string($ts)) return false;
         if (preg_match('/^\d{1,2}:\d{1,2}(:[\d\.]+)*$/', $ts) !== 1)
             return false;
 
@@ -175,6 +177,7 @@ class Validator
 
     public static function is_date($ts)
     {
+		if (!is_string($ts)) return false;
         if (preg_match('/^\d{4}-\d{1,2}-\d{1,2}$/', $ts) !== 1)
             return false;
 
@@ -200,6 +203,7 @@ class Validator
 
     public static function is_ip_address($str)
     {
+		if (!is_string($str)) return false;
         if (preg_match('/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/', $str) == 1) return true;
         return false;
     }
