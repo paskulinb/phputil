@@ -137,11 +137,20 @@ class Validator
         return true;
     }
 
-    private function is_timestamp($ts)
+    /*Valid inputs:
+     * ['yyyy-mm-dd hh:mm:ss.ssss', 'yyyy-mm-dd hh:mm:ss.ssss']
+     * ['yyyy-mm-dd hh:mm:ss.ssss', null]
+     * ['yyyy-mm-dd hh:mm:ss.ssss', '']
+     * [null, 'yyyy-mm-dd hh:mm:ss.ssss']
+     * ['', '']
+     * [null, null]
+     */
+    private function is_timestamp_range($range)
     {
-        if (preg_match('/\d\d\d\d-\d{1,2}-\d{1,2}[T ]\d{1,2}:\d{1,2}:[\d\.+]+/', $ts) !== 1)
-            return false;
-
+        if (!is_array($range)) return false;
+        if (count($range) != 2) return false;
+        if (!(self::is_timestamp($range[0]) || self::is_empty_string($range[0]) || is_null($range[0]))) return false;
+        if (!(self::is_timestamp($range[1]) || self::is_empty_string($range[1]) || is_null($range[1]))) return false;
         return true;
     }
  
