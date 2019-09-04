@@ -14,6 +14,7 @@ Validator::apply(array $param, array $ruleset): array
 * is_not_empty_string
 * is_empty_string
 * is_bool
+* is_integer
 * is_num
 * is_id_num
 * is_id_num_array

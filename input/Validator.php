@@ -22,6 +22,12 @@ class Validator
                 $cmd = array_shift($args);
 
                 switch ($cmd){
+                    case 'is_integer':
+                        if (!self::is_integer($obj[$prop_name])){
+                            $error[] = "Not integer '$prop_name' (".$obj[$prop_name].")";
+                        }
+                        break;
+
                     case 'is_num':
                         if (!self::is_num($obj[$prop_name])){
                             $error[] = "Not numeric '$prop_name' (".$obj[$prop_name].")";
@@ -114,6 +120,11 @@ class Validator
     public static function is_bool($var)
     {
         return is_bool($var);
+    }
+
+    public static function is_integer($id)
+    {
+        return (is_integer($id)) ? true : false;
     }
 
     public static function is_num($id)
