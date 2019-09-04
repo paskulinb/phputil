@@ -25,7 +25,7 @@ class Sql
      * $fieldname_prefix  (Table name when needed. If not needed it can be null or ''.)
      * $fld_name          (Table field name if different from input data parameter name. If fileld name is same as input parameter name, tihs can be null or ''.)
      */
-    public static function convert(array $data, array $conversion)
+    public static function collect(array $data, array $conversion)
     {
         $OUT = [];
 
@@ -33,50 +33,118 @@ class Sql
             
             if (isset($data[$key])) {
 				
-				list($fieldname_prefix, $fld_name, $fld_type) = $conv;
+				list($fld_name_prefix, $fld_name, $fld_type) = $conv;
 				
-				if (!is_string($fieldname_prefix)) $fieldname_prefix = '';
+				if (!is_string($fld_name_prefix)) $fld_name_prefix = '';
 				if (!is_string($fld_name) || empty($fld_name)) $fld_name = $key;
+				
+				$new_fld_name = $fld_name_prefix.'.'.$fld_name;
                 
                 switch ($fld_type) {
                   
                   case self::T_TEXT:
                     $data[$key] = str_replace('\'', '"', $data[$key]);
-                    $OUT[$fieldname_prefix.$fld_name] = (empty($data[$key]) ? 'null' : "'".$data[$fld_name]."'");
+                    $OUT[$new_fld_name] = ['value' => (empty($data[$key]) ? 'null' : "'".$data[$fld_name]."'")];
                     break;
 
                   case self::T_NUMERIC:
                   case self::T_FLOAT:
-                    $OUT[$fieldname_prefix.$fld_name] = (float) ($data[$key]);
+                    $OUT[$new_fld_name] = ['value' => (float)($data[$key])];
                     break;
 
                   case self::T_INTEGER:
-                    $OUT[$fieldname_prefix.$fld_name] = (int) ($data[$key]);
+                    $OUT[$new_fld_name] = ['value' => (int)($data[$key])];
                     break;
                 
                   case self::T_DATE:
                   case self::T_TIME:
                   case self::T_TIMESTAMP:
-                    $data[$key] = str_replace("'", "", $data[$key]);
-                    $OUT[$fieldname_prefix.$fld_name] = "'".$data[$key]."'";
+                    $data[$key] = str_replace('\'', '', $data[$key]);
+                    $OUT[$new_fld_name] = ['value' => "'".$data[$key]."'"];
                     break;
                   
                   case self::T_RANGE:
-                    $data[$key] = str_replace("'", "", $data[$key]);
-                    $OUT[$fieldname_prefix.$fld_name] = "'[".$data[$key][0].",".$data[$fld_name][1]."]'";
+                    $data[$key] = str_replace('\'', '', $data[$key]);
+                    $OUT[$new_fld_name] = ['value' => "'[".$data[$key][0].",".$data[$fld_name][1]."]'"];
                     break;
                   
                   case self::T_BOOLEAN:
-                    $OUT[$fieldname_prefix.$fld_name] = (($data[$key]===true) ? 'TRUE' : 'FALSE');
+                    $OUT[$new_fld_name] = ['value' => (($data[$key]===true) ? 'TRUE' : 'FALSE')];
                     break;
                 }
+                $OUT[$new_fld_name]['type'] = $fld_type;
             }
         }
 
         return $OUT;
     }
 
+	public static function join_fields($collection)
+	{
+		return implode(',', array_keys($collection));
+	}
+	
+	public static function join_values($collection)
+	{
+		$VALS = [];
+		foreach ($collection as $key=>$prop){
+			$VALS[] = $prop['value'];
+		}
+		return implode(',', $VALS);
+	}
 
+	public static function join_set($collection) //Alias join_pairs
+	{
+		return self::join_pairs($collection);
+	}
+	
+	public static function join_pairs($collection)
+	{
+		$PAIRS = [];
+		foreach ($collection as $key=>$prop){
+			$PAIRS[] = $key.'='.$prop['value'];
+		}
+		return implode(',', $PAIRS);
+	}
+
+	public static function join_where($collection, $op = 'AND')
+	{
+        $WHERE = [];
+
+        foreach ($collection as $fld_name => $prop) {
+            
+            
+                switch ($prop[$type]) {
+					
+                    case self::T_TEXT:
+                        $WHERE[] = $fld_name." ILIKE '".$prop['value']."'";
+                        break;
+
+                    case self::T_NUMERIC:
+                    case self::T_FLOAT:
+                        $WHERE[] = $fld_name.'='.(float)($prop['value']);
+                        break;
+
+                    case self::T_INTEGER:
+                        $WHERE[] = $fld_name.'='.(int)($prop['value']);
+                        break;
+
+                    case self::T_DATE:
+                    case self::T_TIME:
+                    case self::T_TIMESTAMP:
+                        $WHERE[] = $fld_name."='".$prop['value']."'";
+                        break;
+
+                    case self::T_RANGE:
+                        $WHERE[] = $fld_name."@>'".$prop['value']."'";
+                        break;
+                }
+
+        }
+
+        return implode(" $op ", $WHERE);
+	}
+	
     public static function format(array $data, array $fields, $fieldname_prefix = '') ////DEPRECATED
     {
         $PAR = [];
