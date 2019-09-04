@@ -13,7 +13,71 @@ class Sql
     const T_BOOLEAN = 9;
     
 
-    public static function format(array $data, array $fields, $fieldname_prefix = '')
+    /* $data = [
+     * 		key=>value,
+     * 		...
+     * ]
+     * 
+     * $conversion = [
+     * 		key_name => [$fieldname_prefix, $fld_name, $fld_type],
+     * 		...
+     * ]
+     * $fieldname_prefix  (Table name when needed. If not needed it can be null or ''.)
+     * $fld_name          (Table field name if different from input data parameter name. If fileld name is same as input parameter name, tihs can be null or ''.)
+     */
+    public static function convert(array $data, array $conversion)
+    {
+        $OUT = [];
+
+        foreach ($conversion as $key => $conv) {
+            
+            if (isset($data[$key])) {
+				
+				list($fieldname_prefix, $fld_name, $fld_type) = $conv;
+				
+				if (!is_string($fieldname_prefix)) $fieldname_prefix = '';
+				if (!is_string($fld_name) || empty($fld_name)) $fld_name = $key;
+                
+                switch ($fld_type) {
+                  
+                  case self::T_TEXT:
+                    $data[$key] = str_replace('\'', '"', $data[$key]);
+                    $OUT[$fieldname_prefix.$fld_name] = (empty($data[$key]) ? 'null' : "'".$data[$fld_name]."'");
+                    break;
+
+                  case self::T_NUMERIC:
+                  case self::T_FLOAT:
+                    $OUT[$fieldname_prefix.$fld_name] = (float) ($data[$key]);
+                    break;
+
+                  case self::T_INTEGER:
+                    $OUT[$fieldname_prefix.$fld_name] = (int) ($data[$key]);
+                    break;
+                
+                  case self::T_DATE:
+                  case self::T_TIME:
+                  case self::T_TIMESTAMP:
+                    $data[$key] = str_replace("'", "", $data[$key]);
+                    $OUT[$fieldname_prefix.$fld_name] = "'".$data[$key]."'";
+                    break;
+                  
+                  case self::T_RANGE:
+                    $data[$key] = str_replace("'", "", $data[$key]);
+                    $OUT[$fieldname_prefix.$fld_name] = "'[".$data[$key][0].",".$data[$fld_name][1]."]'";
+                    break;
+                  
+                  case self::T_BOOLEAN:
+                    $OUT[$fieldname_prefix.$fld_name] = (($data[$key]===true) ? 'TRUE' : 'FALSE');
+                    break;
+                }
+            }
+        }
+
+        return $OUT;
+    }
+
+
+    public static function format(array $data, array $fields, $fieldname_prefix = '') ////DEPRECATED
     {
         $PAR = [];
 
