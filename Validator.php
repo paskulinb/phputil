@@ -6,115 +6,40 @@ class Validator
     {
         $error = [];
         foreach ($rules as $prop_name=>$rule_set){
+			
+			$error[$prop_name] = false;
 
-            $property_is_set = isset($obj[$prop_name]);
+			if (!isset($obj[$prop_name])){
+				if (in_array('required', $rule_set)){
+					$error[$prop_name] = "Missing '$prop_name'";
+				}
+				continue; //goto next property
+			}
 
-            foreach ($rule_set as $rule){
+            foreach ($rule_set as $test_functions){
 
-                if (!$property_is_set){
-                    if (in_array('required', $rule_set)){
-                        $error[] = "Missing '$prop_name'";
-                    }
-                    break; //goto next property
-                }
+                $test_functions = explode('|', $test_functions);
+                foreach ($test_functions as $test_fn) {
 
-                $args = explode(':', $rule);
-                $cmd = array_shift($args);
-
-                switch ($cmd){
-                    case 'is_integer':
-                        if (!self::is_integer($obj[$prop_name])){
-                            $error[] = "Not integer '$prop_name' (".$obj[$prop_name].")";
-                        }
-                        break;
-
-                    case 'is_num':
-                        if (!self::is_num($obj[$prop_name])){
-                            $error[] = "Not numeric '$prop_name' (".$obj[$prop_name].")";
-                        }
-                        break;
-
-                    case 'is_id_num':
-                        if (!self::is_id_num($obj[$prop_name])){
-                            $error[] = "Invalid ID '$prop_name' (".$obj[$prop_name].")";
-                        }
-                        break;
-
-                    case 'is_id_num_array':
-                        if (!self::is_id_num_array($obj[$prop_name])){
-                            $error[] = "Invalid array of IDs '$prop_name'";
-                        }
-                        break;
-
-                    case 'is_time':
-                        if (!self::is_time($obj[$prop_name])){
-                            $error[] = "Invalid time '$prop_name' (".$obj[$prop_name].")";
-                        }
-                        break;
-
-                    case 'is_date':
-                        if (!self::is_date($obj[$prop_name])){
-                            $error[] = "Invalid date '$prop_name' (".$obj[$prop_name].")";
-                        }
-                        break;
-
-                    case 'is_timestamp':
-                        if (!self::is_timestamp($obj[$prop_name])){
-                            $error[] = "Invalid timestamp '$prop_name' (".$obj[$prop_name].")";
-                        }
-                        break;
-
-                    case 'is_timestamp_range':
-                        if (!self::is_timestamp_range($obj[$prop_name])){
-                            $error[] = "Invalid timestamp range '$prop_name'";
-                        }
-                        break;
-
-                    case 'is_not_empty_string':
-                        if (!self::is_not_empty_string($obj[$prop_name])){
-                            $error[] = "Empty string '$prop_name'";
-                        }
-                        break;
-
-                    case 'is_string':
-                        if (!self::is_string($obj[$prop_name])){
-                            $error[] = "Not a string '$prop_name'";
-                        }
-                        break;
-
-                    case 'is_bool':
-                        if (!self::is_bool($obj[$prop_name])){
-                            $error[] = "Not boolean '$prop_name'";
-                        }
-                        break;
-
-                    case 'is_string_alphanumeric':
-                        if (!self::is_string_alphanumeric($obj[$prop_name])){
-                            $error[] = "Not alpha-numeric string '$prop_name'";
-                        }
-                        break;
-
-                    case 'is_string_numeric':
-                        if (!self::is_string_numeric($obj[$prop_name])){
-                            $error[] = "Not a numeric string '$prop_name'";
-                        }
-                        break;
-
-                    case 'is_string_alpha':
-                        if (!self::is_string_alpha($obj[$prop_name])){
-                            $error[] = "Not a alpha string '$prop_name'";
-                        }
-                        break;
-
-                    case 'is_ip_address':
-                        if (!self::is_ip_address($obj[$prop_name])){
-                            $error[] = "Not valid IP address '$prop_name'";
-                        }
-                        break;
-                }
+					if ($test_fn == 'required') continue;
+					//if (!method_exists('Validator', $test_fn)) continue;
+					
+					if (self::$test_fn($obj[$prop_name])){
+						$error[$prop_name] = true;
+					}
+					else {
+						if ($error[$prop_name] === true) continue;
+						$error[$prop_name] = false;
+					}
+				}
             }
         }
-        return $error;
+        
+        $invalid = [];
+        foreach ($error as $prop_name=>$stat){
+			if ($stat === false) $invalid[] = $prop_name;
+		}
+        return $invalid;
     }
 
     public static function is_bool($var)

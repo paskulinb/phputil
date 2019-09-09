@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-require('Validator.php');
+require('../Validator.php');
 
 fn_test(
 	'is_bool',
@@ -190,21 +190,44 @@ fn_test(
 );
 
 
+echo "Function: apply\n";
 $err = Validator::apply(
     [
         's1'   => 12,
         'tsr1' => ['2019-2-1 21:2:3',null],
         'tsr2' => ['2019-2-1 21:2:3'],
+        'termin1' => '2019-2-1',
+        'termin2' => ['2019-2-1 21:2:3',null],
+        'termin3' => 'kar nekaj',
         'ip1'  => 132.3,
         'ip2'  => '192.0.32.0',
     ],
     [
-        'x'    => ['required'],
+        'x'    => ['required', 'is_date'],
         's1'   => ['is_string'],
         'tsr1' => ['is_timestamp_range'],
         'tsr2' => ['is_timestamp_range'],
+        'termin1' => ['is_timestamp_range|is_date'],
+        'termin2' => ['is_timestamp_range|is_date'],
+        'termin3' => ['is_timestamp_range|is_date'],
         'ip1'  => ['is_ip_address', 'required'],
         'ip2'  => ['is_ip_address'],
+    ]
+);
+
+print_r($err);
+
+echo "Function: apply\n";
+$err = Validator::apply(
+    [
+        'termin1' => '2019-2-1',
+        'termin2' => ['2019-2-1 21:2:3',null],
+        'termin3' => 'kar nekaj',
+    ],
+    [
+        'termin1' => ['is_timestamp_range|is_date'],
+        'termin2' => ['is_date|is_timestamp_range'],
+        'termin3' => ['is_timestamp_range|is_date'],
     ]
 );
 

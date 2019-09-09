@@ -35,10 +35,12 @@ class Sql
 				
 				list($fld_name_prefix, $fld_name, $fld_type) = $conv;
 				
-				if (!is_string($fld_name_prefix)) $fld_name_prefix = '';
+				$fld_name_prefix =
+					(is_string($fld_name_prefix) && !empty($fld_name_prefix)) ?
+					  ($fld_name_prefix.'.') : '';
 				if (!is_string($fld_name) || empty($fld_name)) $fld_name = $key;
 				
-				$new_fld_name = $fld_name_prefix.'.'.$fld_name;
+				$new_fld_name = $fld_name_prefix.$fld_name;
                 
                 switch ($fld_type) {
                   
@@ -65,7 +67,7 @@ class Sql
                   
                   case self::T_RANGE:
                     $data[$key] = str_replace('\'', '', $data[$key]);
-                    $OUT[$new_fld_name] = ['value' => "'[".$data[$key][0].",".$data[$fld_name][1]."]'"];
+                    $OUT[$new_fld_name] = ['value' => "'[".$data[$key][0].",".$data[$key][1]."]'"];
                     break;
                   
                   case self::T_BOOLEAN:
@@ -114,10 +116,10 @@ class Sql
         foreach ($collection as $fld_name => $prop) {
             
             
-                switch ($prop[$type]) {
+                switch ($prop['type']) {
 					
                     case self::T_TEXT:
-                        $WHERE[] = $fld_name." ILIKE '".$prop['value']."'";
+                        $WHERE[] = $fld_name.' ILIKE '.$prop['value'];
                         break;
 
                     case self::T_NUMERIC:
@@ -132,11 +134,11 @@ class Sql
                     case self::T_DATE:
                     case self::T_TIME:
                     case self::T_TIMESTAMP:
-                        $WHERE[] = $fld_name."='".$prop['value']."'";
+                        $WHERE[] = $fld_name.'='.$prop['value'];
                         break;
 
                     case self::T_RANGE:
-                        $WHERE[] = $fld_name."@>'".$prop['value']."'";
+                        $WHERE[] = $fld_name.'@>'.$prop['value'];
                         break;
                 }
 
@@ -261,7 +263,7 @@ class Sql
      * - 'length' or 'limit' -> generate SQL sentence part 'LIMIT x'
      * - 'start' or 'offset' -> generate SQL sentence part 'OFFSET x'
      */
-    private static function limit_offset($params)
+    public static function limit_offset($params)
     {
         $return = '';
 
