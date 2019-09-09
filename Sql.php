@@ -287,6 +287,11 @@ class Sql
      */
     public static function ts_range_from_dbstring_to_array($tsrange_string)
     {
+		getArray_from_rangeStr($tsrange_string)
+	}
+	
+    public static function getArray_from_rangeStr($range_string)
+    {
         preg_match('/[\[\(](.*),(.*)[\]\)]/', $tsrange_string, $matches);
         $matches[1] = str_replace('"','',$matches[1]);
         $matches[2] = str_replace('"','',$matches[2]);
