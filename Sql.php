@@ -292,7 +292,7 @@ class Sql
 	
     public static function getArray_from_rangeStr($range_string)
     {
-        preg_match('/[\[\(](.*),(.*)[\]\)]/', $tsrange_string, $matches);
+        preg_match('/[\[\(](.*),(.*)[\]\)]/', $range_string, $matches);
         $matches[1] = str_replace('"','',$matches[1]);
         $matches[2] = str_replace('"','',$matches[2]);
         return [(empty($matches[1])? null : $matches[1]),
