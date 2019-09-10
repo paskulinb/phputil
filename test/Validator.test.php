@@ -38,7 +38,7 @@ fn_test(
         [55, true],
         [0, false],
         [-1, false],
-        ['2', false],
+        ['2', true],
         ['-1', false],
         ['', false],
     ]

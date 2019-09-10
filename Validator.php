@@ -7,14 +7,14 @@ class Validator
         $error = [];
         foreach ($rules as $prop_name=>$rule_set){
 			
-			$error[$prop_name] = false;
-
 			if (!isset($obj[$prop_name])){
 				if (in_array('required', $rule_set)){
-					$error[$prop_name] = "Missing '$prop_name'";
+					$error[$prop_name] = false;
 				}
 				continue; //goto next property
 			}
+
+			$error[$prop_name] = false;
 
             foreach ($rule_set as $test_functions){
 
@@ -59,6 +59,7 @@ class Validator
 
     public static function is_id_num($id)
     {
+		if (self::is_string_integer($id)) $id = intval($id);
         return (is_integer($id) && $id > 0) ? true : false;
     }
 
@@ -159,11 +160,27 @@ class Validator
         return true;
     }
 
+    public static function is_string_integer($str)
+    {
+		if (!is_string($str)) return false;
+        return ctype_digit($str);
+    }
+
     public static function is_string_numeric($str)
     {
 		if (!is_string($str)) return false;
-        if (preg_match('/[^0-9]+/', $str) == 1) return false;
+        if (preg_match('/[^0-9\.]+/', $str) == 1) return false;
         return true;
+    }
+
+    public static function is_object($param)
+    {
+        return is_object($param);
+    }
+
+    public static function is_array($param)
+    {
+        return is_array($param);
     }
 
     public static function filter(array $input, array $keys)

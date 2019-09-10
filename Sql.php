@@ -11,6 +11,7 @@ class Sql
     const T_TIMESTAMP = 7;
     const T_RANGE = 8;
     const T_BOOLEAN = 9;
+    const T_JSON = 10;
     
 
     /* $data = [
@@ -47,6 +48,10 @@ class Sql
                   case self::T_TEXT:
                     $data[$key] = str_replace('\'', '"', $data[$key]);
                     $OUT[$new_fld_name] = ['value' => (empty($data[$key]) ? 'null' : "'".$data[$fld_name]."'")];
+                    break;
+
+                  case self::T_JSON:
+                    $OUT[$new_fld_name] = ['value' => "'".json_encode($data[$key])."'"];
                     break;
 
                   case self::T_NUMERIC:
