@@ -178,6 +178,15 @@ class Validator
         return is_object($param);
     }
 
+    public static function is_string_array($param)
+    {
+        if (!is_array($param)) return false;
+        foreach ($param as $item) {
+			if (!is_string($item)) return false;
+		}
+		return true;
+    }
+
     public static function is_array($param)
     {
         return is_array($param);

@@ -233,6 +233,23 @@ $err = Validator::apply(
 
 print_r($err);
 
+
+echo "Function: apply\n";
+$err = Validator::apply(
+    [
+        'choices1' => 'cho1',
+        'choices2' => ['cho2',null],
+        'choices3' => ['kar nekaj','cho3'],
+    ],
+    [
+        'choices1' => ['is_string_array'],
+        'choices2' => ['is_string_array'],
+        'choices3' => ['is_string_array'],
+    ]
+);
+
+print_r($err);
+
 ###########################################
 function fn_test($fn_name, $test_cases)
 {

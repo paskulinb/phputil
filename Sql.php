@@ -12,6 +12,7 @@ class Sql
     const T_RANGE = 8;
     const T_BOOLEAN = 9;
     const T_JSON = 10;
+    const T_TEXT_ARRAY = 11;
     
 
     /* $data = [
@@ -31,7 +32,7 @@ class Sql
         $OUT = [];
 
         foreach ($conversion as $key => $conv) {
-            
+
             if (isset($data[$key])) {
 				
 				list($fld_name_prefix, $fld_name, $fld_type) = $conv;
@@ -39,16 +40,29 @@ class Sql
 				$fld_name_prefix =
 					(is_string($fld_name_prefix) && !empty($fld_name_prefix)) ?
 					  ($fld_name_prefix.'.') : '';
+
 				if (!is_string($fld_name) || empty($fld_name)) $fld_name = $key;
 				
 				$new_fld_name = $fld_name_prefix.$fld_name;
-                
+
                 switch ($fld_type) {
                   
                   case self::T_TEXT:
                     $data[$key] = str_replace('\'', '"', $data[$key]);
-                    $OUT[$new_fld_name] = ['value' => (empty($data[$key]) ? 'null' : "'".$data[$fld_name]."'")];
+                    $OUT[$new_fld_name] = ['value' => "'".$data[$key]."'"];
                     break;
+
+                  case self::T_TEXT_ARRAY:
+					foreach ($data[$key] as &$item) {
+						$item = str_replace('\'', '"', $item);
+						if (empty($item)) {
+							unset($data[$key]);
+							continue;
+						}
+						$item = "'".$item."'";
+					}
+					$OUT[$new_fld_name] = ['value' => $data[$key]];
+					break;
 
                   case self::T_JSON:
                     $OUT[$new_fld_name] = ['value' => "'".json_encode($data[$key])."'"];
@@ -95,6 +109,7 @@ class Sql
 	{
 		$VALS = [];
 		foreach ($collection as $key=>$prop){
+			if (is_array($prop['value'])) continue;
 			$VALS[] = $prop['value'];
 		}
 		return implode(',', $VALS);
@@ -109,6 +124,7 @@ class Sql
 	{
 		$PAIRS = [];
 		foreach ($collection as $key=>$prop){
+			if (is_array($prop['value'])) continue;
 			$PAIRS[] = $key.'='.$prop['value'];
 		}
 		return implode(',', $PAIRS);
@@ -125,6 +141,10 @@ class Sql
 					
                     case self::T_TEXT:
                         $WHERE[] = $fld_name.' ILIKE '.$prop['value'];
+                        break;
+
+                    case self::T_TEXT_ARRAY:
+                        $WHERE[] = $fld_name.' IN ('.implode(',',$prop['value']).')';
                         break;
 
                     case self::T_NUMERIC:
