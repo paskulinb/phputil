@@ -312,7 +312,7 @@ class Sql
      */
     public static function ts_range_from_dbstring_to_array($tsrange_string)
     {
-		return getArray_from_rangeStr($tsrange_string);
+		return self::getArray_from_rangeStr($tsrange_string);
 	}
 	
     public static function getArray_from_rangeStr($range_string)
