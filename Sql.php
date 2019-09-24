@@ -135,8 +135,7 @@ class Sql
         $WHERE = [];
 
         foreach ($collection as $fld_name => $prop) {
-            
-            
+
                 switch ($prop['type']) {
 					
                     case self::T_TEXT:
@@ -294,15 +293,15 @@ class Sql
 
         if (isset($params['limit'])) {
             $return = 'LIMIT '.(int) ($params['limit']);
-        } elseif (isset($params['length'])) {
+        } elseif (isset($params['length'])) { //js:DataTables
             $return = 'LIMIT '.(int) ($params['length']);
-        } //js:DataTables
+        }
 
         if (isset($params['offset'])) {
             $return .= ' OFFSET '.(int) ($params['offset']);
-        } elseif (isset($params['start'])) {
+        } elseif (isset($params['start'])) { //js:DataTables
             $return .= ' OFFSET '.(int) ($params['start']);
-        } //js:DataTables
+        }
 
         return $return;
     }
