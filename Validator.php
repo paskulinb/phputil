@@ -4,42 +4,45 @@ class Validator
 {
     public static function apply($obj, $rules)
     {
-        $error = [];
+        $VALID = [];
         foreach ($rules as $prop_name=>$rule_set){
 			
-			if (!isset($obj[$prop_name])){
+			if (!isset($obj[$prop_name])){ //Is property missing?
+
 				if (in_array('required', $rule_set)){
-					$error[$prop_name] = false;
+					$VALID[$prop_name] = 'missing required';
 				}
 				continue; //goto next property
 			}
 
-			$error[$prop_name] = false;
+			$VALID[$prop_name] = false;
 
             foreach ($rule_set as $test_functions){
 
                 $test_functions = explode('|', $test_functions);
-                foreach ($test_functions as $test_fn) {
+                foreach ($test_functions as $test_fn){
 
-					if ($test_fn == 'required') continue;
-					//if (!method_exists('Validator', $test_fn)) continue;
+					if ($test_fn == 'required') continue; //ignore 'required' rule
 					
 					if (self::$test_fn($obj[$prop_name])){
-						$error[$prop_name] = true;
+						$VALID[$prop_name] = true;
 					}
 					else {
-						if ($error[$prop_name] === true) continue;
-						$error[$prop_name] = false;
+						if ($VALID[$prop_name] === true) continue; //already met some condition
+						$VALID[$prop_name] = false;
 					}
 				}
             }
         }
         
-        $invalid = [];
-        foreach ($error as $prop_name=>$stat){
-			if ($stat === false) $invalid[] = $prop_name;
+        foreach ($VALID as $prop_name=>&$stat){
+			if ($stat === false){
+				$VALID[$prop_name] = 'invalid';
+			} else {
+				unset($VALID[$prop_name]);
+			}
 		}
-        return $invalid;
+        return $VALID;
     }
 
     public static function is_bool($var)
