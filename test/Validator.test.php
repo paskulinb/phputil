@@ -198,8 +198,12 @@ $err = Validator::apply(
         'tsr1' => ['2019-2-1 21:2:3',null],
         'tsr2' => ['2019-2-1 21:2:3'],
         'termin1' => '2019-2-1',
-        'termin2' => ['2019-2-1 21:2:3',null],
-        'termin3' => 'kar nekaj',
+        'termin2' => ['2019-2-1T21:2:3',null],
+        'termin3' => [null,'2019-2-1 21:2:3'],
+        'termin4' => ['2019-2-1 21:2:3',''],
+        'termin5' => ['','2019-2-1 21:2:3'],
+        'termin6' => ['',''],
+        'termin7' => 'kar nekaj',
         'ip1'  => 132.3,
         'ip2'  => '192.0.32.0',
     ],
@@ -209,8 +213,12 @@ $err = Validator::apply(
         'tsr1' => ['is_timestamp_range'],
         'tsr2' => ['is_timestamp_range'],
         'termin1' => ['is_timestamp_range|is_date'],
-        'termin2' => ['is_timestamp_range|is_date'],
-        'termin3' => ['is_timestamp_range|is_date'],
+        'termin2' => ['is_timestamp_range'],
+        'termin3' => ['is_timestamp_range'],
+        'termin4' => ['is_timestamp_range'],
+        'termin5' => ['is_timestamp_range'],
+        'termin6' => ['is_timestamp_range'],
+        'termin7' => ['is_timestamp_range'],
         'ip1'  => ['is_ip_address', 'required'],
         'ip2'  => ['is_ip_address'],
     ]
@@ -254,7 +262,37 @@ print_r($err);
 
 echo "Function: apply\n";
 $err = Validator::apply(
-	['qtip_naziv'=>22],
+	[],
+	[
+		'ticket_id' => ['is_id_num'],
+		'tip_naziv' => ['required', 'is_string'],
+		'oseba_id'  => ['required', 'is_id_num'],
+		'naslov'    => ['required', 'is_not_empty_string'],
+		'opis'      => ['is_string'],
+		'termin'    => ['is_timestamp_range|is_date'],
+		'izpad_tip_id'  => ['is_id_num'],
+		'izpad_obdobje' => ['is_timestamp_range'],
+		'lokacija_id'   => ['is_id_num_array'],
+		'unit_lokacija_id' => ['is_id_num_array'],
+		'servis_lokacija_id'  => ['is_id_num_array'],
+	]
+);
+print_r($err);
+
+echo "Function: apply\n";
+$err = Validator::apply(
+	[
+		"tip_id"=> 2,
+		"oseba_id"=> 2,
+		"naslov"=> "NASLOV2",
+		"opis"=> "oblačno vreme",
+		"termin"=> [null, '2019-3-1 9:1:14.96765+01'],
+        "izpad_tip_id"=> 1,
+		"izpad_obdobje"=> ['2018-05-13T2:07:10', '2019-3-1 9:1:14.96765+01'],
+        "lokacija_id"=> [],
+        "naprava_lokacija_id"=> [1,3,2],
+        "servis_lokacija_id"=> [4]
+	],
 	[
 		'ticket_id' => ['is_id_num'],
 		'tip_naziv' => ['required', 'is_string'],

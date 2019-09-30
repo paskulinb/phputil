@@ -32,7 +32,8 @@ class Validator
 					}
 					else {
 						if ($VALID[$prop_name] === true) continue; //already met some condition
-						$VALID[$prop_name] = false;
+						//$VALID[$prop_name] = false;
+						$VALID[$prop_name] = 'invalid '.print_r($obj[$prop_name], true);
 					}
 				}
             }
@@ -86,7 +87,7 @@ class Validator
     public static function is_timestamp($ts)
     {
 		if (!is_string($ts)) return false;
-        if (preg_match('/^\d{4}-\d{1,2}-\d{1,2}[T ]\d{1,2}:\d{1,2}:[\d\.]+$/', $ts) !== 1)
+        if (preg_match('/^\d{4}-\d{1,2}-\d{1,2}[T ]\d{1,2}:\d{1,2}:[\d\.+]+$/', $ts) !== 1)
             return false;
 
         return true;
