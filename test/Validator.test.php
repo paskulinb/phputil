@@ -106,6 +106,7 @@ fn_test(
         [[null, null], true],
         [['2019-2-17T0:0:0'], false],
         [[], false],
+        [12, false],
     ]
 );
 
@@ -249,6 +250,27 @@ $err = Validator::apply(
 );
 
 print_r($err);
+
+
+echo "Function: apply\n";
+$err = Validator::apply(
+	['qtip_naziv'=>22],
+	[
+		'ticket_id' => ['is_id_num'],
+		'tip_naziv' => ['required', 'is_string'],
+		'oseba_id'  => ['required', 'is_id_num'],
+		'naslov'    => ['required', 'is_not_empty_string'],
+		'opis'      => ['is_string'],
+		'termin'    => ['is_timestamp_range|is_date'],
+		'izpad_tip_id'  => ['is_id_num'],
+		'izpad_obdobje' => ['is_timestamp_range'],
+		'lokacija_id'   => ['is_id_num_array'],
+		'unit_lokacija_id' => ['is_id_num_array'],
+		'servis_lokacija_id'  => ['is_id_num_array'],
+	]
+);
+print_r($err);
+
 
 ###########################################
 function fn_test($fn_name, $test_cases)

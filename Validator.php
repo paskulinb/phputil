@@ -10,12 +10,15 @@ class Validator
 			if (!isset($obj[$prop_name])){ //Is property missing?
 
 				if (in_array('required', $rule_set)){
+
 					$VALID[$prop_name] = 'missing required';
 				}
+
 				continue; //goto next property
 			}
-
-			$VALID[$prop_name] = false;
+			else {
+				$VALID[$prop_name] = false;
+			}
 
             foreach ($rule_set as $test_functions){
 
@@ -36,9 +39,9 @@ class Validator
         }
         
         foreach ($VALID as $prop_name=>&$stat){
-			if ($stat === false){
+			if ($stat === false) {
 				$VALID[$prop_name] = 'invalid';
-			} else {
+			} else if ($stat === true) {
 				unset($VALID[$prop_name]);
 			}
 		}
