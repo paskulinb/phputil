@@ -104,7 +104,7 @@ class Sql
 	{
 		return implode(',', array_keys($collection));
 	}
-	
+
 	public static function join_values($collection)
 	{
 		$VALS = [];
@@ -119,7 +119,7 @@ class Sql
 	{
 		return self::join_pairs($collection);
 	}
-	
+
 	public static function join_pairs($collection)
 	{
 		$PAIRS = [];
