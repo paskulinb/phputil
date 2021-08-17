@@ -21,7 +21,8 @@ class Sql
      * ]
      * 
      * $conversion = [
-     * 		key_name => [$fieldname_prefix, $fld_name, $fld_type],
+     * 		key_name => [$fieldname_prefix, $fld_name, $fld_type], //format_1
+     * 		key_name => [$fld_type, 'fld_prefix.fld_name'],        //format_2
      * 		...
      * ]
      * $fieldname_prefix  (Table name when needed. If not needed it can be null or ''.)
