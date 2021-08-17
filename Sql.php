@@ -34,110 +34,122 @@ class Sql
         foreach ($conversion as $key => $conv) {
 
             if (isset($data[$key])) {
-				
-				list($fld_name_prefix, $fld_name, $fld_type) = $conv;
-				
-				$fld_name_prefix =
-					(is_string($fld_name_prefix) && !empty($fld_name_prefix)) ?
-					  ($fld_name_prefix.'.') : '';
 
-				if (!is_string($fld_name) || empty($fld_name)) $fld_name = $key;
-				
-				$new_fld_name = $fld_name_prefix.$fld_name;
+                /* Detect data conversion format: ['prefix','name',type] or [type,'prefix.name'] */
+
+                if (count($conv) == 3 && is_integer($conv[2])) {//format_1: ['prefix','name',type]
+                    
+                    list($fld_name_prefix, $fld_name, $fld_type) = $conv;
+                }
+                else if (count($conv) > 0 && is_integer($conv[0])) {//format_2: [type,'prefix.name']
+                    
+                    $fld_type = $conv[0];
+                    $fld_name_prefix = null;
+                    $fld_name = null;
+                    if (is_string($conv[1])) {
+                        $idntf = explode('.', $conv[1]);
+                        if (count($idntf) == 1) $fld_name = $idntf[0];
+                        else list($fld_name_prefix, $fld_name) = $idntf;
+                    }
+                }
+                
+                $fld_name_prefix = (is_string($fld_name_prefix) && !empty($fld_name_prefix)) ? ($fld_name_prefix.'.') : '';
+                if (!is_string($fld_name) || empty($fld_name)) $fld_name = $key;
+                $final_fld_name = $fld_name_prefix.$fld_name;
 
                 switch ($fld_type) {
                   
                   case self::T_TEXT:
                     $data[$key] = str_replace('\'', '"', $data[$key]);
-                    $OUT[$new_fld_name] = ['value' => "'".$data[$key]."'"];
+                    $OUT[$final_fld_name] = ['value' => "'".$data[$key]."'"];
                     break;
 
                   case self::T_TEXT_ARRAY:
-					foreach ($data[$key] as &$item) {
-						$item = str_replace('\'', '"', $item);
-						if (empty($item)) {
-							unset($data[$key]);
-							continue;
-						}
-						$item = "'".$item."'";
-					}
-					$OUT[$new_fld_name] = ['value' => $data[$key]];
-					break;
+                    foreach ($data[$key] as &$item) {
+                        $item = str_replace('\'', '"', $item);
+                        if (empty($item)) {
+                            unset($data[$key]);
+                            continue;
+                        }
+                        $item = "'".$item."'";
+                    }
+                    $OUT[$final_fld_name] = ['value' => $data[$key]];
+                    break;
 
                   case self::T_JSON:
-                    $OUT[$new_fld_name] = ['value' => "'".json_encode($data[$key])."'"];
+                    $OUT[$final_fld_name] = ['value' => "'".json_encode($data[$key])."'"];
                     break;
 
                   case self::T_NUMERIC:
                   case self::T_FLOAT:
-                    $OUT[$new_fld_name] = ['value' => (float)($data[$key])];
+                    $OUT[$final_fld_name] = ['value' => (is_numeric($data[$key]) ? (float)($data[$key]) : 'NULL')];
                     break;
 
                   case self::T_INTEGER:
-                    $OUT[$new_fld_name] = ['value' => (int)($data[$key])];
+                    $OUT[$final_fld_name] = ['value' => (is_numeric($data[$key]) ? (int)($data[$key]) : 'NULL')];
                     break;
                 
                   case self::T_DATE:
                   case self::T_TIME:
                   case self::T_TIMESTAMP:
                     $data[$key] = str_replace('\'', '', $data[$key]);
-                    $OUT[$new_fld_name] = ['value' => "'".$data[$key]."'"];
+                    $OUT[$final_fld_name] = ['value' => "'".$data[$key]."'"];
                     break;
                   
                   case self::T_RANGE:
                     $data[$key] = str_replace('\'', '', $data[$key]);
-                    $OUT[$new_fld_name] = ['value' => "'[".$data[$key][0].",".$data[$key][1]."]'"];
+                    $OUT[$final_fld_name] = ['value' => "'[".$data[$key][0].",".$data[$key][1]."]'"];
                     break;
                   
                   case self::T_BOOLEAN:
-                    $OUT[$new_fld_name] = ['value' => (($data[$key]===true) ? 'TRUE' : 'FALSE')];
+                    $OUT[$final_fld_name] = ['value' => (($data[$key]===true) ? 'TRUE' : 'FALSE')];
                     break;
                 }
-                $OUT[$new_fld_name]['type'] = $fld_type;
+                $OUT[$final_fld_name]['type'] = $fld_type;
             }
         }
 
         return $OUT;
     }
 
-	public static function join_fields($collection)
-	{
-		return implode(',', array_keys($collection));
-	}
+    public static function join_fields($collection)
+    {
+        return implode(',', array_keys($collection));
+    }
 
-	public static function join_values($collection)
-	{
-		$VALS = [];
-		foreach ($collection as $key=>$prop){
-			if (is_array($prop['value'])) continue;
-			$VALS[] = $prop['value'];
-		}
-		return implode(',', $VALS);
-	}
+    public static function join_values($collection)
+    {
+        $VALS = [];
+        foreach ($collection as $key=>$prop){
+            if (is_array($prop['value'])) continue;
+            $VALS[] = $prop['value'];
+        }
+        return implode(',', $VALS);
+    }
 
-	public static function join_set($collection) //Alias join_pairs
-	{
-		return self::join_pairs($collection);
-	}
+    public static function join_set($collection) //Alias join_pairs
+    {
+        return self::join_pairs($collection);
+    }
 
-	public static function join_pairs($collection)
-	{
-		$PAIRS = [];
-		foreach ($collection as $key=>$prop){
-			if (is_array($prop['value'])) continue;
-			$PAIRS[] = $key.'='.$prop['value'];
-		}
-		return implode(',', $PAIRS);
-	}
+    public static function join_pairs($collection)
+    {
+        $PAIRS = [];
+        foreach ($collection as $key=>$prop){
+            if (is_array($prop['value'])) continue;
+            $PAIRS[] = $key.'='.$prop['value'];
+        }
+        return implode(',', $PAIRS);
+    }
 
-	public static function join_where($collection, $op = 'AND')
-	{
+    public static function join_where($collection, $op = 'AND')
+    {
         $WHERE = [];
 
         foreach ($collection as $fld_name => $prop) {
 
                 switch ($prop['type']) {
-					
+
                     case self::T_TEXT:
                         $WHERE[] = $fld_name.' ILIKE '.$prop['value'];
                         break;
@@ -169,8 +181,8 @@ class Sql
         }
 
         return implode(" $op ", $WHERE);
-	}
-	
+    }
+
     public static function format(array $data, array $fields, $fieldname_prefix = '') ////DEPRECATED
     {
         $PAR = [];
@@ -178,35 +190,35 @@ class Sql
         foreach ($fields as $fld_name => $fld_type) {
             if (isset($data[$fld_name])) {
                 switch ($fld_type) {
-                  case self::T_TEXT:
-                    $data[$fld_name] = str_replace("'", '"', $data[$fld_name]);
-                    $PAR[$fieldname_prefix.$fld_name] = (empty($data[$fld_name]) ? 'null' : "'".$data[$fld_name]."'");
-                    break;
+                    case self::T_TEXT:
+                        $data[$fld_name] = str_replace("'", '"', $data[$fld_name]);
+                        $PAR[$fieldname_prefix.$fld_name] = (empty($data[$fld_name]) ? 'null' : "'".$data[$fld_name]."'");
+                        break;
 
-                  case self::T_NUMERIC:
-                  case self::T_FLOAT:
-                    $PAR[$fieldname_prefix.$fld_name] = (float) ($data[$fld_name]);
-                    break;
+                    case self::T_NUMERIC:
+                    case self::T_FLOAT:
+                        $PAR[$fieldname_prefix.$fld_name] = (float) ($data[$fld_name]);
+                        break;
 
-                  case self::T_INTEGER:
-                    $PAR[$fieldname_prefix.$fld_name] = (int) ($data[$fld_name]);
-                    break;
+                    case self::T_INTEGER:
+                        $PAR[$fieldname_prefix.$fld_name] = (int) ($data[$fld_name]);
+                        break;
                 
-                  case self::T_DATE:
-                  case self::T_TIME:
-                  case self::T_TIMESTAMP:
-                    $data[$fld_name] = str_replace("'", "", $data[$fld_name]);
-                    $PAR[$fieldname_prefix.$fld_name] = "'".$data[$fld_name]."'";
-                    break;
-                  
-                  case self::T_RANGE:
-                    $data[$fld_name] = str_replace("'", "", $data[$fld_name]);
-                    $PAR[$fieldname_prefix.$fld_name] = "'[".$data[$fld_name][0].",".$data[$fld_name][1]."]'";
-                    break;
-                  
-                  case self::T_BOOLEAN:
-                    $PAR[$fieldname_prefix.$fld_name] = (($data[$fld_name]===true) ? 'TRUE' : 'FALSE');
-                    break;
+                    case self::T_DATE:
+                    case self::T_TIME:
+                    case self::T_TIMESTAMP:
+                        $data[$fld_name] = str_replace("'", "", $data[$fld_name]);
+                        $PAR[$fieldname_prefix.$fld_name] = "'".$data[$fld_name]."'";
+                        break;
+                    
+                    case self::T_RANGE:
+                        $data[$fld_name] = str_replace("'", "", $data[$fld_name]);
+                        $PAR[$fieldname_prefix.$fld_name] = "'[".$data[$fld_name][0].",".$data[$fld_name][1]."]'";
+                        break;
+                    
+                    case self::T_BOOLEAN:
+                        $PAR[$fieldname_prefix.$fld_name] = (($data[$fld_name]===true) ? 'TRUE' : 'FALSE');
+                        break;
                 }
             }
         }
@@ -221,7 +233,7 @@ class Sql
     public static function fields_values($fields_values)
     {
         $SET = [];
-        foreach ($fields_values as $key=>$val){
+        foreach ($fields_values as $key=>$val) {
             $SET[] = $key.'='.$val;
         }
         return ['fields'=>implode(',', array_keys($fields_values)),
@@ -311,9 +323,9 @@ class Sql
      */
     public static function ts_range_from_dbstring_to_array($tsrange_string)
     {
-		return self::getArray_from_rangeStr($tsrange_string);
-	}
-	
+        return self::getArray_from_rangeStr($tsrange_string);
+    }
+
     public static function getArray_from_rangeStr($range_string)
     {
         preg_match('/[\[\(](.*),(.*)[\]\)]/', $range_string, $matches);
