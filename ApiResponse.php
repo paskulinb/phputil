@@ -13,7 +13,7 @@ class ApiResponse
         $this->response['success'] = $success;
         return $this;
     }
-    
+
     public function Error($message)
     {
         $this->response['message'] = $message;
@@ -40,9 +40,9 @@ class ApiResponse
     {
         $this->response['debug'] = $message;
         $this->response['type'] = 'debug';
-        $this->response['success'] = false;
         return $this;
     }
+
     public function Set($custom_key, $custom_value)
     {
         $this->response[$custom_key] = $custom_value;
@@ -70,9 +70,32 @@ class ApiResponse
         return $this;
     }
     
+    /**
+     * @deprecated Use ApiResponse::Dump method
+     */
     public function Output()
     {
         return $this->response;
     }
+
+    /**
+     * @return mixed
+     */
+    public function Dump($key = null)
+    {
+        return is_null($key) ? $this->response : $this->response[$key];
+    }
+
+    /**
+     * @return JSON dump in JSON format
+     */
+    public function Json($flags = 0, $depth = 512)
+    {
+        return json_encode($this->response, $flags, $depth);
+    }
+
+    public function IsOk()
+    {
+        return $this->response['success'];
+    }
 }
- 
