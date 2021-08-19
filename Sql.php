@@ -13,6 +13,7 @@ class Sql
     const T_BOOLEAN = 9;
     const T_JSON = 10;
     const T_TEXT_ARRAY = 11;
+    const T_CHAR = 12;
     
 
     /* $data = [
@@ -59,13 +60,13 @@ class Sql
                 $final_fld_name = $fld_name_prefix.$fld_name;
 
                 switch ($fld_type) {
-                  
-                  case self::T_TEXT:
+                
+                case self::T_TEXT:
                     $data[$key] = str_replace('\'', '"', $data[$key]);
                     $OUT[$final_fld_name] = ['value' => "'".$data[$key]."'"];
                     break;
 
-                  case self::T_TEXT_ARRAY:
+                case self::T_TEXT_ARRAY:
                     foreach ($data[$key] as &$item) {
                         $item = str_replace('\'', '"', $item);
                         if (empty($item)) {
@@ -77,32 +78,37 @@ class Sql
                     $OUT[$final_fld_name] = ['value' => $data[$key]];
                     break;
 
-                  case self::T_JSON:
+                case self::T_CHAR:
+                    $data[$key] = str_replace('\'', '\\\'', $data[$key]);
+                    $OUT[$final_fld_name] = ['value' => (empty($data[$key]) ? 'NULL' : "'".$data[$key]."'")];
+                    break;
+
+                case self::T_JSON:
                     $OUT[$final_fld_name] = ['value' => "'".json_encode($data[$key])."'"];
                     break;
 
-                  case self::T_NUMERIC:
-                  case self::T_FLOAT:
+                case self::T_NUMERIC:
+                case self::T_FLOAT:
                     $OUT[$final_fld_name] = ['value' => (is_numeric($data[$key]) ? (float)($data[$key]) : 'NULL')];
                     break;
 
-                  case self::T_INTEGER:
+                case self::T_INTEGER:
                     $OUT[$final_fld_name] = ['value' => (is_numeric($data[$key]) ? (int)($data[$key]) : 'NULL')];
                     break;
-                
-                  case self::T_DATE:
-                  case self::T_TIME:
-                  case self::T_TIMESTAMP:
+            
+                case self::T_DATE:
+                case self::T_TIME:
+                case self::T_TIMESTAMP:
                     $data[$key] = str_replace('\'', '', $data[$key]);
                     $OUT[$final_fld_name] = ['value' => "'".$data[$key]."'"];
                     break;
-                  
-                  case self::T_RANGE:
+                
+                case self::T_RANGE:
                     $data[$key] = str_replace('\'', '', $data[$key]);
                     $OUT[$final_fld_name] = ['value' => "'[".$data[$key][0].",".$data[$key][1]."]'"];
                     break;
-                  
-                  case self::T_BOOLEAN:
+                
+                case self::T_BOOLEAN:
                     $OUT[$final_fld_name] = ['value' => (($data[$key]===true) ? 'TRUE' : 'FALSE')];
                     break;
                 }
