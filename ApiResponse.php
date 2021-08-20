@@ -71,7 +71,7 @@ class ApiResponse
     }
     
     /**
-     * @deprecated Use ApiResponse::Dump method
+     * @deprecated Use ApiResponse::Get method
      */
     public function Output()
     {
