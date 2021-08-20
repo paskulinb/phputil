@@ -81,7 +81,7 @@ class ApiResponse
     /**
      * @return mixed
      */
-    public function Dump($key = null)
+    public function Get($key = null)
     {
         return is_null($key) ? $this->response : $this->response[$key];
     }
