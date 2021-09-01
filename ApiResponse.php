@@ -98,4 +98,9 @@ class ApiResponse
     {
         return $this->response['success'];
     }
+
+    public function Fail()
+    {
+        return !$this->response['success'];
+    }
 }
