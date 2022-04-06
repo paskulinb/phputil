@@ -14,7 +14,13 @@ class Sql
     const T_JSON = 10;
     const T_TEXT_ARRAY = 11;
     const T_CHAR = 12;
-    
+    const T_INTEGER_ARRAY = 13;
+    const T_NUMERIC_ARRAY = 14;
+    const T_FLOAT_ARRAY = 15;
+
+    /* flags */
+    const F_DISCARD_EMPTY = 1;
+
 
     /* $data = [
      * 		key=>value,
@@ -23,11 +29,11 @@ class Sql
      * 
      * $conversion = [
      * 		key_name => [$fieldname_prefix, $fld_name, $fld_type], //format_1
-     * 		key_name => [$fld_type, 'fld_prefix.fld_name'],        //format_2
+     * 		key_name => [$fld_type, 'fld_prefix.fld_name', flags], //format_2
      * 		...
      * ]
      * $fieldname_prefix  (Table name when needed. If not needed it can be null or ''.)
-     * $fld_name          (Table field name if different from input data parameter name. If fileld name is same as input parameter name, tihs can be null or ''.)
+     * $fld_name          (Table field name if different from input data parameter name. If fileld name is same as input parameter name, this can be null or ''.)
      */
     public static function collect(array $data, array $conversion)
     {
@@ -37,13 +43,15 @@ class Sql
 
             if (isset($data[$key])) {
 
+                $flags = 0;
+
                 /* Detect data conversion format: ['prefix','name',type] or [type,'prefix.name'] */
 
-                if (count($conv) == 3 && is_integer($conv[2])) {//format_1: ['prefix','name',type]
+                if (count($conv) == 3 && is_string($conv[0]) && is_integer($conv[2])) {//format_1: ['prefix','name',type]
                     
                     list($fld_name_prefix, $fld_name, $fld_type) = $conv;
                 }
-                else if (count($conv) > 0 && is_integer($conv[0])) {//format_2: [type,'prefix.name']
+                else if (count($conv) > 0 && is_integer($conv[0])) {//format_2: [type,'prefix.name',flags]
                     
                     $fld_type = $conv[0];
                     $fld_name_prefix = null;
@@ -53,6 +61,8 @@ class Sql
                         if (count($idntf) == 1) $fld_name = $idntf[0];
                         else list($fld_name_prefix, $fld_name) = $idntf;
                     }
+                    if (isset($conv[2]) && is_integer($conv[2])) $flags = $conv[2];
+                    $flags = intval($conv[2]);
                 }
                 
                 $fld_name_prefix = (is_string($fld_name_prefix) && !empty($fld_name_prefix)) ? ($fld_name_prefix.'.') : '';
@@ -62,6 +72,7 @@ class Sql
                 switch ($fld_type) {
                 
                 case self::T_TEXT:
+                    if (($flags & Sql::F_DISCARD_EMPTY) && empty($data[$key])) break;
                     $data[$key] = str_replace('\'', '"', $data[$key]);
                     $OUT[$final_fld_name] = ['value' => "'".$data[$key]."'"];
                     break;
@@ -95,6 +106,30 @@ class Sql
                 case self::T_INTEGER:
                     $OUT[$final_fld_name] = ['value' => (is_numeric($data[$key]) ? (int)($data[$key]) : 'NULL')];
                     break;
+
+                case self::T_INTEGER_ARRAY:
+                    foreach ($data[$key] as &$item) {
+                        if (!is_numeric($item)) {
+                            unset($data[$key]);
+                            continue;
+                        }
+                        $item = (int)($item);
+                    }
+                    $OUT[$final_fld_name] = ['value' => $data[$key]];
+                    break;
+    
+                case self::T_NUMERIC_ARRAY:
+                case self::T_FLOAT_ARRAY:
+                    foreach ($data[$key] as &$item) {
+                        if (!is_numeric($item)) {
+                            unset($data[$key]);
+                            continue;
+                        }
+                        $item = (float)($item);
+                    }
+                    $OUT[$final_fld_name] = ['value' => $data[$key]];
+                    break;
+    
             
                 case self::T_DATE:
                 case self::T_TIME:
@@ -112,7 +147,8 @@ class Sql
                     $OUT[$final_fld_name] = ['value' => (($data[$key]===true) ? 'TRUE' : 'FALSE')];
                     break;
                 }
-                $OUT[$final_fld_name]['type'] = $fld_type;
+                
+                if (isset($OUT[$final_fld_name])) $OUT[$final_fld_name]['type'] = $fld_type;
             }
         }
 
@@ -149,45 +185,73 @@ class Sql
         return implode(',', $PAIRS);
     }
 
-    public static function join_where($collection, $op = 'AND')
+    /**
+     * $opt = [
+     *     'join_operator'=>(string)           join operator ['AND'|'OR'] (default 'AND')
+     *     'fopt'=>[
+     *         field_name=>[
+     *             'cmp_operator'=>(string)    comaprison operator (default '=' for Numeric,Date,String_without_wildcard, 'ILIKE' for String_with_wildcard, '@>' for Range)
+     *         ]
+     *     ]
+     * ]
+     */
+    public static function join_where($collection, $opt = [])
     {
         $WHERE = [];
 
+        if (is_string($opt)) $opt = ['join_operator'=>$opt]; //backward compatibility
+        if (!isset($opt['join_operator'])) $opt['join_operator'] = 'AND';  //default
+        if (!isset($opt['fopt']) || !is_array($opt['fopt'])) $opt['fopt'] = [];
+
         foreach ($collection as $fld_name => $prop) {
+
+                $cmp_operator = isset($opt['fopt'][$fld_name]['cmp_operator']) ? ' '.$opt['fopt'][$fld_name]['cmp_operator'].' ' : null;
 
                 switch ($prop['type']) {
 
                     case self::T_TEXT:
-                        $WHERE[] = $fld_name.' ILIKE '.$prop['value'];
+                        if (is_null($cmp_operator)) {
+                            if (strpos($prop['value'], '%') !== false) $cmp_operator = ' ILIKE ';  //wildcard present
+                            else $cmp_operator = '=';
+                        }
+                        $WHERE[] = $fld_name.$cmp_operator.$prop['value'];
                         break;
 
-                    case self::T_TEXT_ARRAY:
-                        $WHERE[] = $fld_name.' IN ('.implode(',',$prop['value']).')';
-                        break;
 
                     case self::T_NUMERIC:
                     case self::T_FLOAT:
-                        $WHERE[] = $fld_name.'='.(float)($prop['value']);
+                        $cmp_operator = is_null($cmp_operator) ? '=' : $cmp_operator;
+                        $WHERE[] = $fld_name.$cmp_operator.(float)($prop['value']);
                         break;
 
                     case self::T_INTEGER:
-                        $WHERE[] = $fld_name.'='.(int)($prop['value']);
+                        $cmp_operator = is_null($cmp_operator) ? '=' : $cmp_operator;
+                        $WHERE[] = $fld_name.$cmp_operator.(int)($prop['value']);
+                        break;
+
+                    case self::T_TEXT_ARRAY:
+                    case self::T_INTEGER_ARRAY:
+                    case self::T_NUMERIC_ARRAY:
+                    case self::T_FLOAT_ARRAY:
+                        $WHERE[] = $fld_name.' IN ('.implode(',',$prop['value']).')';
                         break;
 
                     case self::T_DATE:
                     case self::T_TIME:
                     case self::T_TIMESTAMP:
-                        $WHERE[] = $fld_name.'='.$prop['value'];
+                        $cmp_operator = is_null($cmp_operator) ? '=' : $cmp_operator;
+                        $WHERE[] = $fld_name.$cmp_operator.$prop['value'];
                         break;
 
                     case self::T_RANGE:
-                        $WHERE[] = $fld_name.'@>'.$prop['value'];
+                        $cmp_operator = is_null($cmp_operator) ? '@>' : $cmp_operator;
+                        $WHERE[] = $fld_name.$cmp_operator.$prop['value'];
                         break;
                 }
 
         }
 
-        return implode(" $op ", $WHERE);
+        return implode(" {$opt['join_operator']} ", $WHERE);
     }
 
     public static function format(array $data, array $fields, $fieldname_prefix = '') ////DEPRECATED

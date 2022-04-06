@@ -7,14 +7,14 @@ class Validator
         $VALID = [];
         foreach ($rules as $prop_name=>$rule_set){
 			
-			if (!isset($obj[$prop_name])){ //Is property missing?
+			if (!isset($obj[$prop_name])){ //TODO: change isset() --> array_key_exist()
 
 				if (in_array('required', $rule_set)){
 
 					$VALID[$prop_name] = 'missing required';
 				}
 
-				continue; //goto next property
+				continue;
 			}
 			else {
 				$VALID[$prop_name] = false;
@@ -56,24 +56,23 @@ class Validator
 
     public static function is_integer($id)
     {
-        return (is_integer($id)) ? true : false;
+        return is_int($id);
     }
 
     public static function is_num($id)
     {
-        return (is_numeric($id)) ? true : false;
+        return is_numeric($id);
     }
 
     public static function is_id_num($id)
     {
 		if (self::is_string_integer($id)) $id = intval($id);
-        return (is_integer($id) && $id > 0) ? true : false;
+        return (is_int($id) && $id > 0) ? true : false;
     }
 
     public static function is_id_num_array($arrid)
     {
-        if (!is_array($arrid))
-            return false;
+        if (!is_array($arrid)) return false;
 
         foreach ($arrid as $id){
             if (!self::is_id_num($id)){
@@ -87,9 +86,7 @@ class Validator
     public static function is_timestamp($ts)
     {
 		if (!is_string($ts)) return false;
-        if (preg_match('/^\d{4}-\d{1,2}-\d{1,2}[T ]\d{1,2}:\d{1,2}:[\d\.+]+$/', $ts) !== 1)
-            return false;
-
+        if (preg_match('/^\d{4}-\d{1,2}-\d{1,2}[T ]\d{1,2}:\d{1,2}:[\d\.+]+$/', $ts) !== 1) return false;
         return true;
     }
 
@@ -130,8 +127,7 @@ class Validator
 
     public static function is_empty_string($str)
     {
-        if (is_string($str) && empty($str)) return true;
-        return false;
+        return (is_string($str) && empty($str)) ? true : false;
     }
 
     public static function is_string($str)
@@ -141,8 +137,7 @@ class Validator
 
     public static function is_not_empty_string($str)
     {
-        if (is_string($str) && !empty($str)) return true;
-        return false;
+        return (is_string($str) && !empty($str)) ? true : false;
     }
 
     public static function is_ip_address($str)

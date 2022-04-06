@@ -71,7 +71,7 @@ class ApiResponse
     }
     
     /**
-     * @deprecated Use ApiResponse::Get method
+     * @deprecated Use method ApiResponse::Get
      */
     public function Output()
     {
@@ -84,6 +84,11 @@ class ApiResponse
     public function Get($key = null)
     {
         return is_null($key) ? $this->response : $this->response[$key];
+    }
+
+    public function GetMessage()
+    {
+        return $this->response['message'];
     }
 
     /**
@@ -99,7 +104,7 @@ class ApiResponse
         return $this->response['success'];
     }
 
-    public function Fail()
+    public function IsFail()
     {
         return !$this->response['success'];
     }
